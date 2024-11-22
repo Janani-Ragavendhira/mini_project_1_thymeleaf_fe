@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
@@ -22,6 +23,11 @@ public class EmployeeController {
     @GetMapping
     public List<Employee> getEmployees() {
         return employeeRepo.findAll();
+    }
+
+    @GetMapping("/sayHello")
+    public String sayHello() {
+        return "Hello World";
     }
 
     @GetMapping("/{id}")
@@ -89,25 +95,25 @@ public class EmployeeController {
         return response;
     }
 
-    @DeleteMapping
-    public Map<String, String> deleteEmployee(@RequestBody Employee employee)  {
+    @DeleteMapping("/{id}")
+    public Map<String, String> deleteEmployee(@PathVariable Long id)  {
         Map<String, String> response = new HashMap<>();
         response.put("status", "fail");
 
         try {
-            if( employee.getId().toString().isBlank() ) {
-                response.put("message", "All fields are mandatory");
+            if( id < 1 ) {
+                response.put("message", "Invalid Request");
                 return response;
             }
 
-            Optional<Employee> existingEmployee = employeeRepo.findById(employee.getId());
+            Optional<Employee> existingEmployee = employeeRepo.findById(id);
 
-            if(existingEmployee.isEmpty()) {
+            if( existingEmployee.isEmpty() ) {
                 response.put("message", "Invalid Employee");
                 return response;
             }
 
-            employeeRepo.delete(employee);
+            employeeRepo.delete(existingEmployee.get());
             response.put("status", "success");
             response.put("message", "Employee Deleted");
         } catch (Exception e) {
